@@ -31,18 +31,19 @@ pstacks	space	(ST_SIZE * 3)	; reservation d'espace pour 3 processes
 ;			r1 = adresse point d'entree
 	export init_1
 init_1	proc
+
 ; pointeur de pile initial 
-	ldr	r2, =pstacks		; zone des piles
+	ldr	r3, =pstacks		; zone des piles
 	mov	r12, #ST_SIZE
-	add	r2, r12			; sommet de la premiere pile
-	mla	r2, r0, r12, r2		; ajouter r0 * ST_SIZE -> sommet de la pile choisie
-	sub	r2, #CTX_SIZ		; espace pour pile pre-remplie de 16 mots de 32 bits 
-	ldr	r3, =sp_tab		; table des SP's
-	str	r2, [r3, r0, LSL #2]	; SP du process
+	add	r3, r12			; sommet de la premiere pile
+	mla	r3, r0, r12, r3		; ajouter PID * ST_SIZE -> sommet de la pile choisie
+	sub	r3, #CTX_SIZ		; espace pour pile pre-remplie de 16 mots de 32 bits 
+	ldr	r12, =sp_tab		; table des SP's
+	str	r3, [r12, r0, LSL #2]	; SP du process
 ; contenu minimal pour cette pile : PC et PSR
-	str	r1,  [r2, #PC_OFF]	; point d'entree
+	str	r1,  [r3, #PC_OFF]	; point d'entree
 	ldr	r12, =DEF_PSR
-	str	r12, [r2, #PSR_OFF]	; voila, on a prepare un contexte compatible avec un "faux" retour 
+	str	r12, [r3, #PSR_OFF]	; voila, on a prepare un contexte compatible avec un "faux" retour 
 	bx	lr
 ; 
 	endp
