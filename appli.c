@@ -3,7 +3,7 @@
 
 int pcnt[] = { 1, 2, 3 };
 
-void appli_0(void)
+void appli_0( int data )
 {
 int x, y, i, j, k, m;
 while	(1)
@@ -20,7 +20,7 @@ while	(1)
 				for	( m = 0; m < 10; ++m )
 					{
 					x = 10 * v + m;
-					pcnt[0] = ( x << 16 ) | ( ( y++ ) & 0xFFFF ); 
+					pcnt[data] = ( x << 16 ) | ( ( y++ ) & 0xFFFF ); 
 					}
 				}
 			}
@@ -28,7 +28,7 @@ while	(1)
 	}
 }
 
-void appli_1(void)
+void appli_1( int data )
 {
 double d = 0.0;
 double inc = 0.001;
@@ -39,16 +39,16 @@ while	(1)
 	x = (int)round( d / inc );
 	if	( x >= 65536 )
 		{ d = 0.0; x = 0; } 
-	pcnt[1] = ( x << 16 ) | ( ++y & 0xFFFF );
+	pcnt[data] = ( x << 16 ) | ( ++y & 0xFFFF );
 	}
 }
 
-void appli_2(void)
+void appli_2( int data )
 {
 int x = 0xFFFF, y = 0;
 while	(1)
 	{
 	x = x - 1;
-	pcnt[2] = ( (~x) << 16 ) | ( ++y & 0xFFFF );
+	pcnt[data] = ( (~x) << 16 ) | ( ++y & 0xFFFF );
 	}
 }

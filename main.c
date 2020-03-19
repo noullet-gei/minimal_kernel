@@ -21,13 +21,13 @@ SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
 }
 
 // fonction de noyau.s
-void init_1( int num_proc, void (*entry_adr)(void) );
+void init_1( int num_proc, void (*entry_adr)(int), int data );
 
 int main(void)
 {
-init_1( 0, appli_0 );
-init_1( 1, appli_1 );
-init_1( 2, appli_2 );
+init_1( 0, appli_1, 2 );	// deux processes utilisent le meme code appli_1
+init_1( 1, appli_1, 1 );	// mais leurs resultats seront separes grace
+init_1( 2, appli_2, 0 );	// a l'argument qui leur est passe au demarrage
 
 start_systick( 1000 );
 

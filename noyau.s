@@ -17,6 +17,7 @@ ST_SIZE	equ	0x800		; taille totale d'une pile de process
 PC_OFF	equ	(14*4)		; position de PC dans un contexte empile 
 PSR_OFF	equ	(15*4)		; position de PSR (flags) "   "       "
 CTX_SIZ	equ	(16*4)		; taille d'un contexte entier
+R0_OFF	equ	(8*4)		; position de R0 dans un contexte empile 
 DEF_PSR	equ	0x01000000	; valeur de PSR par defaut (flags)
 
 pstacks	space	(ST_SIZE * 3)	; reservation d'espace pour 3 processes
@@ -27,11 +28,11 @@ pstacks	space	(ST_SIZE * 3)	; reservation d'espace pour 3 processes
 
 ;	fonction d'initialisation d'un process - AVANT demarrage du kernel
 ;	le process sera demarre lors d'une interrupt future
-;			r0 = numero de process
+;			r0 = PID numero de process
 ;			r1 = adresse point d'entree
+;			r2 = donnee passee au process
 	export init_1
 init_1	proc
-
 ; pointeur de pile initial 
 	ldr	r3, =pstacks		; zone des piles
 	mov	r12, #ST_SIZE
@@ -43,8 +44,9 @@ init_1	proc
 ; contenu minimal pour cette pile : PC et PSR
 	str	r1,  [r3, #PC_OFF]	; point d'entree
 	ldr	r12, =DEF_PSR
-	str	r12, [r3, #PSR_OFF]	; voila, on a prepare un contexte compatible avec un "faux" retour 
-	bx	lr
+	str	r12, [r3, #PSR_OFF]
+	str	r2,  [r3, #R0_OFF] 	; la donnee est mise a la position de r0 dans le contexte
+	bx	lr			; voila, on a prepare un contexte compatible avec un "faux" retour
 ; 
 	endp
 
