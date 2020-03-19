@@ -1,12 +1,13 @@
 #include "math.h"
 #include "appli.h"
+#include "noyau.h"
 
 int pcnt[] = { 1, 2, 3 };
 
 void appli_0( int data )
 {
 int x, y, i, j, k, m;
-while	(1)
+//while	(1)
 	{
 	x = y = 0;
 	for	( i = 0; i < 10; ++i )
@@ -26,6 +27,7 @@ while	(1)
 			}
 		}
 	}
+termine();	// cette appli doit se terminer avec 9999 9999 soit 0x270F270F
 }
 
 void appli_1( int data )
@@ -41,7 +43,7 @@ while	(1)
 		{ d = 0.0; x = 0; } 
 	pcnt[data] = ( x << 16 ) | ( ++y & 0xFFFF );
 	}
-}
+}		// cette appli ne se termine pas
 
 void appli_2( int data )
 {
@@ -50,5 +52,7 @@ while	(1)
 	{
 	x = x - 1;
 	pcnt[data] = ( (~x) << 16 ) | ( ++y & 0xFFFF );
-	}
+	if	( y == 0xDEAD )
+		termine();
+	}	// cette appli doit se terminer avec 0xDEADDEAD
 }

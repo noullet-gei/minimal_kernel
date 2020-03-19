@@ -7,7 +7,7 @@
 pid	dcd	-1	; num du process courant
 
 sp_tab	dcd	0	; tableau des SP, pour chaque process suspendu
-	dcd	0
+	dcd	0	; sp = 0 <==> process termine
 	dcd	0
 
 ; espace pour les piles ------------------------------------------------
@@ -45,14 +45,20 @@ init_1	proc
 	str	r1,  [r3, #PC_OFF]	; point d'entree
 	ldr	r12, =DEF_PSR
 	str	r12, [r3, #PSR_OFF]
-	str	r2,  [r3, #R0_OFF] 	; la donnee est mise a la position de r0 dans le contexte
-	bx	lr			; voila, on a prepare un contexte compatible avec un "faux" retour
+	str	r2,  [r3, #R0_OFF]	; voila, on a prepare un contexte compatible avec un "faux" retour 
+	bx	lr
 ; 
 	endp
 
+;	appel systeme de terminaison d'un process. Doit etre appelee par lui-meme
+	export termine
+termine proc
+	svc	1	; pour le moment l'argument de svc est ignore
+	bx	lr
+	endp
 
-;	traitement interrupt
-;	c'est cela le kernel
+;	traitement systick interrupt
+;	c'est un point d'entree du kernel
 	export	SysTick_Handler
 	import	icnt
 SysTick_Handler	proc
@@ -70,7 +76,10 @@ SysTick_Handler	proc
 ; sauver son SP dans la table
 	ldr	r2, =sp_tab
 	str	sp, [r2, r0, LSL #2]
+scheduler
+	cpsid	f		; interdire interrups car sp peut etre invalide
 ; changer le numero de process
+next_pid
 	add	r0, #1
 	cmp	r0, #3		; limite -> bouclage
 	blo	r0_ok
@@ -78,6 +87,8 @@ SysTick_Handler	proc
 r0_ok	str	r0, [r1]
 ; changer de contexte
 	ldr	sp, [r2, r0, LSL #2]
+	cmp	sp, #0		; sauter process invalide
+	beq	next_pid
 ; et voila on retourne sur un autre process
 	pop	{ r4, r5, r6, r7, r8, r9, r10, r11 }
 	bx	lr
@@ -89,5 +100,19 @@ coldstart
 ;
 	endp
 
+;	traitement SVC soft interrupt
+;	c'est un point d'entree du kernel, pour les appels systeme
+	export	SVC_Handler
+SVC_Handler	proc
+	push	{ r4, r5, r6, r7, r8, r9, r10, r11 }
+; recuperer le numero du process interrompu
+	ldr	r1, =pid
+	ldr	r0, [r1]
+; terminer ce process = sauver son SP invalide dans la table
+	ldr	r2, =sp_tab
+	mov	r12, #0
+	str	r12, [r2, r0, LSL #2]
+	b	scheduler
+	endp
 
 	end
